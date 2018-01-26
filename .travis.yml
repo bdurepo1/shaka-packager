@@ -15,10 +15,12 @@ before_install:
   - test -n $CXX && unset CXX
 
 install:
+  #Clone down build dependencies
   - git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git ../depot_tools/
   - export PATH="$PATH:$PWD/../depot_tools"
 
 before_script:
+  #Carry out the build both Release and Debug
   - mkdir src
   - shopt -s extglob dotglob
   - mv !(src) src
@@ -32,6 +34,7 @@ script:
   - if [ ${LIBPACKAGER_TYPE} == "shared_library" ] && [ ${TRAVIS_OS_NAME} == "osx" ]; then
       export DYLD_FALLBACK_LIBRARY_PATH=./out/${BUILD_TYPE};
     fi
+    #Run the unit tests (executables all have a _test suffix)
   - ( find out/${BUILD_TYPE} -name "*_*test" | while read i ; do $i || exit ; done )
   - out/${BUILD_TYPE}/packager_test.py -v --libpackager_type=${LIBPACKAGER_TYPE}
 
@@ -40,17 +43,21 @@ before_deploy:
   - mkdir deploy
   - |
     if [ ${LIBPACKAGER_TYPE} == "shared_library" ]; then
-      if [ ${TRAVIS_OS_NAME} == "linux" ]; then
+        #Move deployable shared libraries
+        if [ ${TRAVIS_OS_NAME} == "linux" ]; then
         mv out/${BUILD_TYPE}/lib/libpackager.so deploy/libpackager-${TRAVIS_OS_NAME}.so
       else
         mv out/${BUILD_TYPE}/libpackager.dylib deploy/libpackager-${TRAVIS_OS_NAME}.dylib
       fi
+
     else
+        #Move deployable the executables
       mv out/${BUILD_TYPE}/packager deploy/packager-${TRAVIS_OS_NAME}
       mv out/${BUILD_TYPE}/mpd_generator deploy/mpd_generator-${TRAVIS_OS_NAME}
     fi
 
 deploy:
+  #Carry out the release deployment
   provider: releases
   api_key:
     secure: PbhquzRnY1BkGkM/6LmVSZjhUd8jWnj77QjxAKA8REnFhbAuzqwDYuytRmUsBFMtgatUEgTuh/1duZaIl0yXGvRZdNeGk7BgtguUy6vraWObjjNUSlQ6Njm4y/hMgaUIOhA9I2b8gokWU1PA0sDJOF/FoZaAxFpKXcW4d8Z2C0s=
