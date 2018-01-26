@@ -29,13 +29,12 @@ BuildRequires: clang
 %{summary}
 
 %prep
-git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /tmp/depot_tools
-export PATH=/tmp/depot_tools/:$PATH
+export PATH=/depot_tools/:$PATH
 gclient config https://www.github.com/google/shaka-packager.git --name=src --unmanaged
 gclient sync  --no-history
 
 %build
-export PATH=/tmp/depot_tools/:$PATH
+export PATH=/depot_tools/:$PATH
 cd src/ && ninja -C out/Release
 
 %install
@@ -46,8 +45,9 @@ cp -p packager protoc mpd_generator $RPM_BUILD_ROOT/usr/bin/
 %files
 %defattr(-, root, root)
 /usr/bin/packager
+/usr/bin/mpd_generator
+/usr/bin/protoc
 
 %clean
-rm -Rf /tmp/depot_tools
 %changelog
 
