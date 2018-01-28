@@ -35,12 +35,18 @@ gclient sync  --no-history
 
 %build
 export PATH=/depot_tools/:$PATH
+gclient runhooks
 cd src/ && ninja -C out/Release
+
+# Run the unit tests
+for unit_test in out/Release/*_unittest ; do
+	./${unit_test}
+done
 
 %install
 cd src/out/Release
-mkdir -p $RPM_BUILD_ROOT/usr/bin && \ 
-cp -p packager protoc mpd_generator $RPM_BUILD_ROOT/usr/bin/
+mkdir -p $RPM_BUILD_ROOT/usr/bin \
+	&& cp -p packager protoc mpd_generator $RPM_BUILD_ROOT/usr/bin/
 
 %files
 %defattr(-, root, root)
