@@ -16,8 +16,8 @@ before_install:
 
 install:
   #Clone down build dependencies
-  - git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git ../depot_tools/
-  - export PATH="$PATH:$PWD/../depot_tools"
+  - git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /tmp/depot_tools/
+  - export PATH="/tmp/depot_tools:$PATH"
 
 before_script:
   #Carry out the build both Release and Debug
@@ -29,6 +29,8 @@ before_script:
   - gclient sync
   - cd src
   - ninja -C out/${BUILD_TYPE} -k 100
+  - cd packager/testing/test_scripts
+  - sh build_repo_packages.sh 
 
 script:
   - if [ ${LIBPACKAGER_TYPE} == "shared_library" ] && [ ${TRAVIS_OS_NAME} == "osx" ]; then
@@ -51,9 +53,10 @@ before_deploy:
       fi
 
     else
-        #Move deployable the executables
+        #Move to deployables directory
       mv out/${BUILD_TYPE}/packager deploy/packager-${TRAVIS_OS_NAME}
       mv out/${BUILD_TYPE}/mpd_generator deploy/mpd_generator-${TRAVIS_OS_NAME}
+      mv packager/testing/test_scripts/artifacts/shaka-packager* deploy/
     fi
 
 deploy:
