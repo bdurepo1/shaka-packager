@@ -10,6 +10,9 @@ env:
   - BUILD_TYPE=Release LIBPACKAGER_TYPE=static_library
   - BUILD_TYPE=Release LIBPACKAGER_TYPE=shared_library
 
+services:
+  - docker
+
 before_install:
   - test -n $CC  && unset CC
   - test -n $CXX && unset CXX
