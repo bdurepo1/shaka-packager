@@ -1,89 +1,71 @@
 language: cpp
-
 os:
-  - linux
-  - osx
-
+- linux
+- osx
 env:
   matrix:
   - BUILD_TYPE=Debug LIBPACKAGER_TYPE=static_library OS_TYPE=centos OS_VERSION=7
   - BUILD_TYPE=Debug LIBPACKAGER_TYPE=shared_library OS_TYPE=centos OS_VERSION=7
   - BUILD_TYPE=Debug LIBPACKAGER_TYPE=static_library OS_TYPE=ubuntu OS_VERSION=16.04
   - BUILD_TYPE=Debug LIBPACKAGER_TYPE=shared_library OS_TYPE=ubuntu OS_VERSION=16.04
-
   - BUILD_TYPE=Release LIBPACKAGER_TYPE=static_library OS_TYPE=centos OS_VERSION=7
   - BUILD_TYPE=Release LIBPACKAGER_TYPE=shared_library OS_TYPE=centos OS_VERSION=7
   - BUILD_TYPE=Release LIBPACKAGER_TYPE=static_library OS_TYPE=ubuntu OS_VERSION=16.04
   - BUILD_TYPE=Release LIBPACKAGER_TYPE=shared_library OS_TYPE=centos OS_VERSION=16.04
-
 services:
-  - docker
-
+- docker
 before_install:
-  - test -n $CC  && unset CC
-  - test -n $CXX && unset CXX
-
+- test -n $CC  && unset CC
+- test -n $CXX && unset CXX
 install:
-  #Clone down build dependencies
-  - git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /tmp/depot_tools/
-  - export PATH="/tmp/depot_tools:$PATH"
-
+- git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /tmp/depot_tools/
+- export PATH="/tmp/depot_tools:$PATH"
 before_script:
-  #Carry out the build both Release and Debug
-  - mkdir src
-  - shopt -s extglob dotglob
-  - mv !(src) src
-  - gclient config https://github.com/bdurepo1/shaka-packager.git --name=src --unmanaged
-  - export GYP_DEFINES="libpackager_type=${LIBPACKAGER_TYPE}"
-  - gclient sync
-  - cd src
-  - ninja -C out/${BUILD_TYPE} -k 100
-  - echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -s devicemapper"' | sudo tee /etc/default/docker > /dev/null
-  - sudo service docker restart
-  - sleep 5
-  - sudo docker pull centos:centos7
-  - sh packager/testing/test_scripts/build_repo_packages.sh 
-
+- mkdir src
+- shopt -s extglob dotglob
+- mv !(src) src
+- gclient config https://github.com/bdurepo1/shaka-packager.git --name=src --unmanaged
+- export GYP_DEFINES="libpackager_type=${LIBPACKAGER_TYPE}"
+- gclient sync
+- cd src
+- ninja -C out/${BUILD_TYPE} -k 100
+- echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -s devicemapper"'
+  | sudo tee /etc/default/docker > /dev/null
+- sudo service docker restart
+- sleep 5
+- sudo docker pull centos:centos7
+- sh packager/testing/test_scripts/build_repo_packages.sh
 script:
-  - if [ ${LIBPACKAGER_TYPE} == "shared_library" ] && [ ${TRAVIS_OS_NAME} == "osx" ]; then
-      export DYLD_FALLBACK_LIBRARY_PATH=./out/${BUILD_TYPE};
-    fi
-    #Run the unit tests (executables all have a _test suffix)
-  - ( find out/${BUILD_TYPE} -name "*_*test" | while read i ; do $i || exit ; done )
-  - out/${BUILD_TYPE}/packager_test.py -v --libpackager_type=${LIBPACKAGER_TYPE}
-
+- if [ ${LIBPACKAGER_TYPE} == "shared_library" ] && [ ${TRAVIS_OS_NAME} == "osx" ];
+  then export DYLD_FALLBACK_LIBRARY_PATH=./out/${BUILD_TYPE}; fi
+- ( find out/${BUILD_TYPE} -name "*_*test" | while read i ; do $i || exit ; done )
+- out/${BUILD_TYPE}/packager_test.py -v --libpackager_type=${LIBPACKAGER_TYPE}
 before_deploy:
-  - rm -rf deploy
-  - mkdir deploy
-  - |
-    if [ ${LIBPACKAGER_TYPE} == "shared_library" ]; then
-        #Move deployable shared libraries
-        if [ ${TRAVIS_OS_NAME} == "linux" ]; then
-        mv out/${BUILD_TYPE}/lib/libpackager.so deploy/libpackager-${TRAVIS_OS_NAME}.so
-      else
-        mv out/${BUILD_TYPE}/libpackager.dylib deploy/libpackager-${TRAVIS_OS_NAME}.dylib
-      fi
-
+- rm -rf deploy
+- mkdir deploy
+- |
+  if [ ${LIBPACKAGER_TYPE} == "shared_library" ]; then
+      #Move deployable shared libraries
+      if [ ${TRAVIS_OS_NAME} == "linux" ]; then
+      mv out/${BUILD_TYPE}/lib/libpackager.so deploy/libpackager-${TRAVIS_OS_NAME}.so
     else
-        #Move to deployables directory
-      mv out/${BUILD_TYPE}/packager deploy/packager-${TRAVIS_OS_NAME}
-      mv out/${BUILD_TYPE}/mpd_generator deploy/mpd_generator-${TRAVIS_OS_NAME}
-      mv packager/testing/test_scripts/artifacts/shaka-packager* deploy/
+      mv out/${BUILD_TYPE}/libpackager.dylib deploy/libpackager-${TRAVIS_OS_NAME}.dylib
     fi
 
+  else
+      #Move to deployables directory
+    mv out/${BUILD_TYPE}/packager deploy/packager-${TRAVIS_OS_NAME}
+    mv out/${BUILD_TYPE}/mpd_generator deploy/mpd_generator-${TRAVIS_OS_NAME}
+    mv packager/testing/test_scripts/artifacts/shaka-packager* deploy/
+  fi
 deploy:
-  #Carry out the release deployment
   provider: releases
   api_key:
-    secure: PbhquzRnY1BkGkM/6LmVSZjhUd8jWnj77QjxAKA8REnFhbAuzqwDYuytRmUsBFMtgatUEgTuh/1duZaIl0yXGvRZdNeGk7BgtguUy6vraWObjjNUSlQ6Njm4y/hMgaUIOhA9I2b8gokWU1PA0sDJOF/FoZaAxFpKXcW4d8Z2C0s=
-  file_glob: true
+    secure: hYVzEieJ6rM5PDTv/kLEv9f+Hhy+xxmXiWohv7qhmkeCZ7TJk6uMwwfFRiNRr+hAzw2qmFBgvBOZmm0Jj1fu9Dn/phN82qXWAE59pE6MDlFqkc6UiXfQcc79lN5Kzgo01/8cakFjfIbbIc6i5d1MttIphct5Z9yJroIjyor6LMHxUkkZIw2HhvFsopWUGHw3ZXoA0Bb8S75NmrwUC4qF1icviItaXFvquLohfTRlY7yZZrnWgmBCjhE7KXubTqs+nB/pduzqjE29Pt7NK6kz1LCEUrSqGNSmsblUaV1wudFf+PNqqgBGgNYzUIt3dloWCCUz+3JxvqX5JkKl+f8rxpKf1wV6cmfxcBclorwl+wBlz97HyK8ZbMTF/OlInUOk9tI6AmKCS5R7dMKgK6NV7PHN0OqMQtN5NlGhRe9TnT3FygYd8+PwQ1vWILP6zz4UKGGCLCQORYdeJK8e02DMtJxTLNWeS6j6c43/xd/VvHgnnPuQfNrjffmZMYvAUBjCzxycgDZUlV5Q/O8+Rx1LxzzLOfc4uQjGdSunFvkeYpOs0yf/bOseu6TDVscBPdvop+5iZn/HVdv84Y2WJId5E9JMFCZvMPXA9Sm+SnSNhoIoITwxrCFAlT80GahLr91byqCV4UapMC8L3THnJ/AEVGR6eKi1079wS3mOym9Z0kc=
   file: deploy/*
-  skip_cleanup: true
   on:
-    tags: true
-    condition: ${BUILD_TYPE} = Release
-
+    repo: bdurepo1/shaka-packager
 branches:
   only:
-    - master
-    - "/^v\\d+\\./"
+  - master
+  - "/^v\\d+\\./"
