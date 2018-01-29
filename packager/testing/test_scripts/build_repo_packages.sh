@@ -19,7 +19,7 @@ DOCKER_CONTAINER_ID=$(docker ps | grep centos | awk '{print $1}')
 docker logs $DOCKER_CONTAINER_ID
 
 # Execute the build and test script in the build container
-if [ ${OS_TYPE} == "centos" ] then;
+if [ ${OS_TYPE} == "centos" ]; then
 	docker exec -ti $DOCKER_CONTAINER_ID \
 		/bin/bash -xec "bash -xe /resources/build_centos_rpm.sh"
 fi
