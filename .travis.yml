@@ -32,6 +32,10 @@ before_script:
   - gclient sync
   - cd src
   - ninja -C out/${BUILD_TYPE} -k 100
+  - echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -s devicemapper"' | sudo tee /etc/default/docker > /dev/null
+  - sudo service docker restart
+  - sleep 5
+  - sudo docker pull centos:centos7
   - sh packager/testing/test_scripts/build_repo_packages.sh 
 
 script:

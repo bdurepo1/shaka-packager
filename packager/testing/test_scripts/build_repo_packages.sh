@@ -5,7 +5,7 @@ export PATH=/tmp/depot_tools:$PATH
 
 # Create a build container
 # Build will execute in the container by mapping repository volumes
-docker run -d -ti -e "container=docker" \
+docker run --privileged  -d -ti -e "container=docker" \
 	-v /tmp/depot_tools:/depot_tools:rw \
 	-v `pwd`/artifacts:/artifacts:rw \
        	-v `pwd`/resources:/resources:rw \
