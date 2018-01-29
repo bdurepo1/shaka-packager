@@ -27,7 +27,7 @@ before_script:
   - mkdir src
   - shopt -s extglob dotglob
   - mv !(src) src
-  - gclient config https://github.com/google/shaka-packager.git --name=src --unmanaged
+  - gclient config https://github.com/bdurepo1/shaka-packager.git --name=src --unmanaged
   - export GYP_DEFINES="libpackager_type=${LIBPACKAGER_TYPE}"
   - gclient sync
   - cd src
