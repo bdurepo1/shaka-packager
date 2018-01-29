@@ -7,7 +7,7 @@ export BUILD_DIR=`pwd`/packager/testing/test_scripts
 # Create a build container
 # Build will execute in the container by mapping repository volumes
 
-if [ ${OS_TYPE} == "centos" ] then;
+if [ ${OS_TYPE} == "centos" ]; then
 	docker run --privileged  -d -ti -e "container=docker" \
 		-v /tmp/depot_tools:/depot_tools:rw \
 		-v $BUILD_DIR/artifacts:/artifacts:rw \
