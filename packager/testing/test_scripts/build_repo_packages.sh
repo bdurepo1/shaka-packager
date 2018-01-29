@@ -24,7 +24,7 @@ if [ $OS_TYPE = "centos" ]; then
 		/bin/bash -xec "bash -xe /resources/build_centos_rpm.sh"
 fi
 
-# Do cleanup
+# Do cleanup 
 docker ps -a
 docker stop $DOCKER_CONTAINER_ID
 docker rm -v $DOCKER_CONTAINER_ID
