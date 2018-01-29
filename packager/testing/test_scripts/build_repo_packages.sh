@@ -7,8 +7,8 @@ export BUILD_DIR=`pwd`/packager/testing/test_scripts
 # Create a build container
 # Build will execute in the container by mapping repository volumes
 
-if [ ${OS_TYPE} -eq "centos" ]; then
-	docker run --privileged  -d -ti -e "container=docker" \
+if [ $OS_TYPE == "centos" ]; then
+	docker run  -d -ti -e "container=docker" \
 		-v /tmp/depot_tools:/depot_tools:rw \
 		-v $BUILD_DIR/artifacts:/artifacts:rw \
        		-v $BUILD_DIR/resources:/resources:rw \
@@ -19,7 +19,7 @@ DOCKER_CONTAINER_ID=$(docker ps | grep centos | awk '{print $1}')
 docker logs $DOCKER_CONTAINER_ID
 
 # Execute the build and test script in the build container
-if [ ${OS_TYPE} -eq "centos" ]; then
+if [ $OS_TYPE == "centos" ]; then
 	docker exec -ti $DOCKER_CONTAINER_ID \
 		/bin/bash -xec "bash -xe /resources/build_centos_rpm.sh"
 fi
