@@ -5,10 +5,16 @@ os:
   - osx
 
 env:
-  - BUILD_TYPE=Debug LIBPACKAGER_TYPE=static_library
-  - BUILD_TYPE=Debug LIBPACKAGER_TYPE=shared_library
-  - BUILD_TYPE=Release LIBPACKAGER_TYPE=static_library
-  - BUILD_TYPE=Release LIBPACKAGER_TYPE=shared_library
+  matrix:
+  - BUILD_TYPE=Debug LIBPACKAGER_TYPE=static_library OS_TYPE=centos OS_VERSION=7
+  - BUILD_TYPE=Debug LIBPACKAGER_TYPE=shared_library OS_TYPE=centos OS_VERSION=7
+  - BUILD_TYPE=Debug LIBPACKAGER_TYPE=static_library OS_TYPE=ubuntu OS_VERSION=16.04
+  - BUILD_TYPE=Debug LIBPACKAGER_TYPE=shared_library OS_TYPE=ubuntu OS_VERSION=16.04
+
+  - BUILD_TYPE=Release LIBPACKAGER_TYPE=static_library OS_TYPE=centos OS_VERSION=7
+  - BUILD_TYPE=Release LIBPACKAGER_TYPE=shared_library OS_TYPE=centos OS_VERSION=7
+  - BUILD_TYPE=Release LIBPACKAGER_TYPE=static_library OS_TYPE=ubuntu OS_VERSION=16.04
+  - BUILD_TYPE=Release LIBPACKAGER_TYPE=shared_library OS_TYPE=centos OS_VERSION=16.04
 
 services:
   - docker
