@@ -6,12 +6,12 @@ env:
   matrix:
   - BUILD_TYPE=Debug LIBPACKAGER_TYPE=static_library OS_TYPE=centos OS_VERSION=7
   - BUILD_TYPE=Debug LIBPACKAGER_TYPE=shared_library OS_TYPE=centos OS_VERSION=7
-  - BUILD_TYPE=Debug LIBPACKAGER_TYPE=static_library OS_TYPE=ubuntu OS_VERSION=16.04
-  - BUILD_TYPE=Debug LIBPACKAGER_TYPE=shared_library OS_TYPE=ubuntu OS_VERSION=16.04
+    #  - BUILD_TYPE=Debug LIBPACKAGER_TYPE=static_library OS_TYPE=ubuntu OS_VERSION=16.04
+    #  - BUILD_TYPE=Debug LIBPACKAGER_TYPE=shared_library OS_TYPE=ubuntu OS_VERSION=16.04
   - BUILD_TYPE=Release LIBPACKAGER_TYPE=static_library OS_TYPE=centos OS_VERSION=7
   - BUILD_TYPE=Release LIBPACKAGER_TYPE=shared_library OS_TYPE=centos OS_VERSION=7
-  - BUILD_TYPE=Release LIBPACKAGER_TYPE=static_library OS_TYPE=ubuntu OS_VERSION=16.04
-  - BUILD_TYPE=Release LIBPACKAGER_TYPE=shared_library OS_TYPE=centos OS_VERSION=16.04
+    #- BUILD_TYPE=Release LIBPACKAGER_TYPE=static_library OS_TYPE=ubuntu OS_VERSION=16.04
+    #- BUILD_TYPE=Release LIBPACKAGER_TYPE=shared_library OS_TYPE=centos OS_VERSION=16.04
 services:
 - docker
 before_install:
@@ -43,21 +43,21 @@ script:
 before_deploy:
 - rm -rf deploy
 - mkdir deploy
-- |
-  if [ ${LIBPACKAGER_TYPE} == "shared_library" ]; then
+- touch test.txt && mv test.txt deploy/
+      #if [ ${LIBPACKAGER_TYPE} == "shared_library" ]; then
       #Move deployable shared libraries
-      if [ ${TRAVIS_OS_NAME} == "linux" ]; then
-      mv out/${BUILD_TYPE}/lib/libpackager.so deploy/libpackager-${TRAVIS_OS_NAME}.so
-    else
-      mv out/${BUILD_TYPE}/libpackager.dylib deploy/libpackager-${TRAVIS_OS_NAME}.dylib
-    fi
+      #if [ ${TRAVIS_OS_NAME} == "linux" ]; then
+      #mv out/${BUILD_TYPE}/lib/libpackager.so deploy/libpackager-${TRAVIS_OS_NAME}.so
+      #else
+      #mv out/${BUILD_TYPE}/libpackager.dylib deploy/libpackager-${TRAVIS_OS_NAME}.dylib
+      #fi
 
-  else
+        #else
       #Move to deployables directory
-    mv out/${BUILD_TYPE}/packager deploy/packager-${TRAVIS_OS_NAME}
-    mv out/${BUILD_TYPE}/mpd_generator deploy/mpd_generator-${TRAVIS_OS_NAME}
-    mv packager/testing/test_scripts/artifacts/shaka-packager* deploy/
-  fi
+      #mv out/${BUILD_TYPE}/packager deploy/packager-${TRAVIS_OS_NAME}
+      #mv out/${BUILD_TYPE}/mpd_generator deploy/mpd_generator-${TRAVIS_OS_NAME}
+      #mv packager/testing/test_scripts/artifacts/shaka-packager* deploy/
+      # fi
 deploy:
   provider: releases
   api_key:
